@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"image"
+	"image/jpeg"
 	_ "image/jpeg"
 	_ "image/png"
 	"math/rand"
@@ -32,12 +32,12 @@ func NewPlayer(name string, stats Stats) *Player {
 
 func main() {
 	// 讀取兩個圖片檔案，解析成人物資料
-	player1Data, err := readImage("player1.png")
+	player1Data, err := readImage("./player1.jpg")
 	if err != nil {
-		fmt.Println("Error reading player1.png:", err)
+		fmt.Println("Error reading player1.jpg:", err)
 		return
 	}
-	player2Data, err := readImage("player2.png")
+	player2Data, err := readImage("./player2.jpg")
 	if err != nil {
 		fmt.Println("Error reading player2.png:", err)
 		return
@@ -45,61 +45,15 @@ func main() {
 
 	// 根據解析出來的資料，創建兩個人物
 	player1 := NewPlayer(player1Data.Name, player1Data.Stats)
+	fmt.Println("Player1 status:", player1)
 	player2 := NewPlayer(player2Data.Name, player2Data.Stats)
+	fmt.Println("Player2 status:", player2)
 
 	// 讓這兩個人物進行對戰
 	winner := fight(player1, player2)
 
 	// 印出勝利者的名字
 	fmt.Printf("%s wins!\n", winner.Name)
-}
-
-func loadImage(filename string) image.Image {
-	file, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	img, _, err := image.Decode(file)
-	if err != nil {
-		panic(err)
-	}
-
-	return img
-}
-
-func calculateStats(img image.Image) Stats {
-	stats := Stats{}
-
-	// 計算圖片的寬度和高度
-	bounds := img.Bounds()
-	width, height := bounds.Max.X, bounds.Max.Y
-
-	// 計算每個 pixel 的值並加總
-	var r, g, b, a uint32
-	for x := 0; x < width; x++ {
-		for y := 0; y < height; y++ {
-			pixel := img.At(x, y)
-			r, g, b, a = pixel.RGBA()
-
-			stats.HP += int(r)
-			stats.MP += int(g)
-			stats.STR += int(b)
-			stats.INT += int(a)
-			stats.LUC += int(r + g + b + a)
-		}
-	}
-
-	// 將總和除以 pixel 總數，得到平均值
-	totalPixels := width * height
-	stats.HP /= totalPixels
-	stats.MP /= totalPixels
-	stats.STR /= totalPixels
-	stats.INT /= totalPixels
-	stats.LUC /= totalPixels
-
-	return stats
 }
 
 func readImage(filePath string) (*Player, error) {
@@ -111,7 +65,7 @@ func readImage(filePath string) (*Player, error) {
 	defer file.Close()
 
 	// 讀取圖片檔案
-	img, _, err := image.Decode(file)
+	img, err := jpeg.Decode(file)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +80,8 @@ func readImage(filePath string) (*Player, error) {
 			r, g, b, _ := img.At(x, y).RGBA()
 			switch {
 			case x < bounds.Max.X/2 && y < bounds.Max.Y/2:
-				data.Name += string(r>>8) + string(g>>8) + string(b>>8)
+				// 隨機生成姓氏和名字
+				data.Name = filePath
 			case x >= bounds.Max.X/2 && y < bounds.Max.Y/2:
 				data.Stats.HP += int(r>>8) + int(g>>8) + int(b>>8)
 			case x < bounds.Max.X/2 && y >= bounds.Max.Y/2:
