@@ -1,3 +1,3 @@
-module github.com/kkdai/image-fighter
+module github.com/kkdai/pixel-fighter
 
 go 1.20
