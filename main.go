@@ -7,7 +7,6 @@ import (
 	_ "image/png"
 	"math/rand"
 	"os"
-	"time"
 )
 
 type Player struct {
@@ -97,15 +96,20 @@ func readImage(filePath string) (*Player, error) {
 	return data, nil
 }
 
+// fight: 在這裡我們先比較兩個玩家的 LUC 屬性值，較高的玩家被選為先攻。
+// 如果兩個玩家的 LUC 屬性值相同，則隨機選擇一個玩家作為先攻。這樣就可以確保 LUC 更高的玩家先攻了。
 func fight(player1 *Player, player2 *Player) Player {
 	fmt.Printf("%s vs. %s!\n", player1.Name, player2.Name)
 
-	// 隨機決定哪個玩家先攻
-	rand.Seed(time.Now().UnixNano())
-	players := []Player{*player1, *player2}
-	attackerIndex := rand.Intn(2)
-	attacker := players[attackerIndex]
-	defender := players[(attackerIndex+1)%2]
+	// 選出 LUC 更高的玩家先攻
+	var attacker, defender Player
+	if player1.Stats.LUC > player2.Stats.LUC {
+		attacker = *player1
+		defender = *player2
+	} else {
+		attacker = *player2
+		defender = *player1
+	}
 	fmt.Printf("%s attacks first!\n", attacker.Name)
 
 	// 玩家攻
