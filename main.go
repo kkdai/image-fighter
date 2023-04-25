@@ -83,12 +83,27 @@ func readImage(filePath string) (*Player, error) {
 				data.Name = filePath
 			case x >= bounds.Max.X/2 && y < bounds.Max.Y/2:
 				data.Stats.HP += int(r>>8) + int(g>>8) + int(b>>8)
+				if data.Stats.HP > 65535 {
+					data.Stats.HP = 65535
+				}
 			case x < bounds.Max.X/2 && y >= bounds.Max.Y/2:
 				data.Stats.MP += int(r>>8) + int(g>>8) + int(b>>8)
+				if data.Stats.MP > 65535 {
+					data.Stats.MP = 65535
+				}
 			case x >= bounds.Max.X/2 && y >= bounds.Max.Y/2:
 				data.Stats.STR += int(r >> 8)
+				if data.Stats.STR > 255 {
+					data.Stats.STR = 255
+				}
 				data.Stats.INT += int(g >> 8)
+				if data.Stats.INT > 255 {
+					data.Stats.INT = 255
+				}
 				data.Stats.LUC += int(b >> 8)
+				if data.Stats.LUC > 255 {
+					data.Stats.LUC = 255
+				}
 			}
 		}
 	}
