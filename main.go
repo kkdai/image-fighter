@@ -44,15 +44,15 @@ func main() {
 
 	// 根據解析出來的資料，創建兩個人物
 	player1 := NewPlayer(player1Data.Name, player1Data.Stats)
-	fmt.Println("Player1 status:", player1)
+	fmt.Println("Player1 STR:", player1.Stats.STR)
 	player2 := NewPlayer(player2Data.Name, player2Data.Stats)
-	fmt.Println("Player2 status:", player2)
+	fmt.Println("Player2 STR:", player2.Stats.STR)
 
 	// 讓這兩個人物進行對戰
-	winner := fight(player1, player2)
+	// winner := fight(player1, player2)
 
 	// 印出勝利者的名字
-	fmt.Printf("%s wins!\n", winner.Name)
+	// fmt.Printf("%s wins!\n", winner.Name)
 }
 
 func readImage(filePath string) (*Player, error) {
@@ -69,7 +69,7 @@ func readImage(filePath string) (*Player, error) {
 		return nil, err
 	}
 
-	// 創建一個新的 CharacterData 物件
+	// 創建一個新的 Player 物件
 	data := &Player{}
 
 	// 解析像素資訊，設定人物名字和屬性值
@@ -83,27 +83,22 @@ func readImage(filePath string) (*Player, error) {
 				data.Name = filePath
 			case x >= bounds.Max.X/2 && y < bounds.Max.Y/2:
 				data.Stats.HP += int(r>>8) + int(g>>8) + int(b>>8)
-				if data.Stats.HP > 65535 {
-					data.Stats.HP = 65535
-				}
 			case x < bounds.Max.X/2 && y >= bounds.Max.Y/2:
 				data.Stats.MP += int(r>>8) + int(g>>8) + int(b>>8)
-				if data.Stats.MP > 65535 {
-					data.Stats.MP = 65535
-				}
 			case x >= bounds.Max.X/2 && y >= bounds.Max.Y/2:
-				data.Stats.STR += int(r >> 8)
-				if data.Stats.STR > 255 {
-					data.Stats.STR = 255
+				// 調整 STR、INT、LUC 的值
+				str := int(r >> 8)
+				INT := int(g >> 8)
+				luc := int(g >> 8)
+				sum := str + INT + luc
+
+				ratio := 1.0
+				if sum > 0 && sum > 255 {
+					ratio = 255.0 / float64(sum)
 				}
-				data.Stats.INT += int(g >> 8)
-				if data.Stats.INT > 255 {
-					data.Stats.INT = 255
-				}
-				data.Stats.LUC += int(b >> 8)
-				if data.Stats.LUC > 255 {
-					data.Stats.LUC = 255
-				}
+				data.Stats.STR = int(float64(str) * ratio)
+				data.Stats.INT = int(float64(INT) * ratio)
+				data.Stats.LUC = int(float64(luc) * ratio)
 			}
 		}
 	}
