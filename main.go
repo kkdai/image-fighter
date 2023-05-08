@@ -44,15 +44,15 @@ func main() {
 
 	// 根據解析出來的資料，創建兩個人物
 	player1 := NewPlayer(player1Data.Name, player1Data.Stats)
-	fmt.Println("Player1 STR:", player1.Stats.STR)
+	fmt.Println("Player1 :", player1.Stats.HP, player1.Stats.MP, player1.Stats.STR, player1.Stats.INT)
 	player2 := NewPlayer(player2Data.Name, player2Data.Stats)
-	fmt.Println("Player2 STR:", player2.Stats.STR)
+	fmt.Println("Player2 :", player2.Stats.HP, player2.Stats.MP, player2.Stats.STR, player2.Stats.INT)
 
 	// 讓這兩個人物進行對戰
-	// winner := fight(player1, player2)
+	winner := fight(player1, player2)
 
 	// 印出勝利者的名字
-	// fmt.Printf("%s wins!\n", winner.Name)
+	fmt.Printf("%s wins!\n", winner.Name)
 }
 
 func readImage(filePath string) (*Player, error) {
@@ -83,8 +83,11 @@ func readImage(filePath string) (*Player, error) {
 				data.Name = filePath
 			case x >= bounds.Max.X/2 && y < bounds.Max.Y/2:
 				data.Stats.HP += int(r>>8) + int(g>>8) + int(b>>8)
+				data.Stats.HP = data.Stats.HP % 65536
+
 			case x < bounds.Max.X/2 && y >= bounds.Max.Y/2:
 				data.Stats.MP += int(r>>8) + int(g>>8) + int(b>>8)
+				data.Stats.MP = (data.Stats.MP % 65536) + data.Stats.INT
 			case x >= bounds.Max.X/2 && y >= bounds.Max.Y/2:
 				// 調整 STR、INT、LUC 的值
 				str := int(r >> 8)
