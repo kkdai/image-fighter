@@ -49,10 +49,10 @@ func main() {
 	fmt.Println("Player2 :", player2.Stats.HP, player2.Stats.MP, player2.Stats.STR, player2.Stats.INT)
 
 	// 讓這兩個人物進行對戰
-	winner := fight(player1, player2)
+	// winner := fight(player1, player2)
 
 	// 印出勝利者的名字
-	fmt.Printf("%s wins!\n", winner.Name)
+	// fmt.Printf("%s wins!\n", winner.Name)
 }
 
 func readImage(filePath string) (*Player, error) {
@@ -83,25 +83,28 @@ func readImage(filePath string) (*Player, error) {
 				data.Name = filePath
 			case x >= bounds.Max.X/2 && y < bounds.Max.Y/2:
 				data.Stats.HP += int(r>>8) + int(g>>8) + int(b>>8)
-				data.Stats.HP = data.Stats.HP % 65536
-
 			case x < bounds.Max.X/2 && y >= bounds.Max.Y/2:
 				data.Stats.MP += int(r>>8) + int(g>>8) + int(b>>8)
-				data.Stats.MP = (data.Stats.MP % 65536) + data.Stats.INT
 			case x >= bounds.Max.X/2 && y >= bounds.Max.Y/2:
 				// 調整 STR、INT、LUC 的值
-				str := int(r >> 8)
-				INT := int(g >> 8)
-				luc := int(g >> 8)
-				sum := str + INT + luc
+				str := int((r + g + b) / 3 >> 8)
+				intensity := int((r + g + b) / 3 >> 8)
+				luc := int((r + g + b) / 3 >> 8)
 
-				ratio := 1.0
-				if sum > 0 && sum > 255 {
-					ratio = 255.0 / float64(sum)
+				// 控制在 0 到 255 之間
+				if str+data.Stats.STR > 255 {
+					str = 255 - data.Stats.STR
 				}
-				data.Stats.STR = int(float64(str) * ratio)
-				data.Stats.INT = int(float64(INT) * ratio)
-				data.Stats.LUC = int(float64(luc) * ratio)
+				if intensity+data.Stats.INT > 255 {
+					intensity = 255 - data.Stats.INT
+				}
+				if luc+data.Stats.LUC > 255 {
+					luc = 255 - data.Stats.LUC
+				}
+
+				data.Stats.STR += str
+				data.Stats.INT += intensity
+				data.Stats.LUC += luc
 			}
 		}
 	}
